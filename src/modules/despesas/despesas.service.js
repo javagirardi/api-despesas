@@ -41,6 +41,16 @@ exports.findAll = async (filters) => {
     return repository.findAll(filters);
 };
 
+exports.findById = async (id) => {
+    const despesa = await repository.findById(id);
+
+    if (!despesa) {
+        throw new AppError(404, "Despesa não encontrada");
+    }
+
+    return despesa;
+};
+
 exports.resumo = async (id) => {
     const despesa = await repository.findById(id);
 

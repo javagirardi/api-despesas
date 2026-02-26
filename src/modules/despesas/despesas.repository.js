@@ -88,6 +88,15 @@ exports.findAll = async (filters) => {
         values.push(filters.max_valor);
     }
 
+    if (filters.q) {
+        query += ` AND (
+        descricao ILIKE $${index}
+        OR centro_custo ILIKE $${index}
+    )`;
+        values.push(`%${filters.q}%`);
+        index++;
+    }
+
     const { rows } = await pool.query(query, values);
     return rows;
 };
