@@ -1,6 +1,6 @@
 const axios = require("axios");
 const cache = require("../../utils/cache");
-const AppError = require("../urtils/AppError");
+const AppError = require("../../utils/AppError");
 
 exports.getRate = async (from, to) => {
     const cacheKey = `${from}_${to}`;

@@ -1,6 +1,6 @@
 const despesasRepository = require("../despesas/despesas.repository");
 const aprovacoesRepository = require("./aprovacoes.repository");
-const AppError = require("../urtils/AppError");
+const AppError = require("../../utils/AppError");
 
 exports.aprovar = async (id, aprovadorEmail, comentario) => {
     const despesa = await despesasRepository.findById(id);

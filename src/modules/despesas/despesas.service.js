@@ -1,5 +1,6 @@
 const repository = require("./despesas.repository");
-const AppError = require("../urtils/AppError");
+const AppError = require("../../utils/AppError");
+const fxService = require("../fx/fx.service");
 
 exports.create = async (data, email) => {
     return repository.create({
@@ -38,4 +39,21 @@ exports.enviar = async (id) => {
 
 exports.findAll = async (filters) => {
     return repository.findAll(filters);
+};
+
+exports.resumo = async (id) => {
+    const despesa = await repository.findById(id);
+
+    if (!despesa) {
+        throw { status: 404, message: "Despesa não encontrada" };
+    }
+
+    const rate = await fxService.getRate("BRL", "USD");
+
+    const valorConvertido = despesa.valor / rate;
+
+    return {
+        ...despesa,
+        valor_usd: Number(valorConvertido.toFixed(2))
+    };
 };

@@ -3,13 +3,14 @@ const authRoutes = require("./modules/auth/auth.routes");
 const despesasRoutes = require("./modules/despesas/despesas.routes");
 const aprovacoesRouter = require("./modules/aprovacoes/aprovacoes.routes");
 const errorMiddleware = require("./middlewares/error.middleware");
-
+const fxRoutes = require("./modules/fx/fx.routes");
 const app = express();
-app.use(express.json());
 
+app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/despesas", despesasRoutes);
 app.use("/despesas", aprovacoesRouter);
 app.use(errorMiddleware);
+app.use("/fx", fxRoutes);
 
 module.exports = app;

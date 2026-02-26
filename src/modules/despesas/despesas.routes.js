@@ -11,5 +11,6 @@ router.put("/:id", controller.update);
 router.post("/:id/enviar", controller.enviar);
 router.get("/", controller.findAll);
 router.get("/:id", controller.findById);
+router.get("/:id/resumo", controller.resumo);
 
 module.exports = router;
