@@ -15,7 +15,7 @@ exports.aprovar = async (id, aprovadorEmail, comentario) => {
     }
 
     // Regra 2: se valor > 5000, comentário obrigatório
-    if (despesa.valor > 5000 && !comentario) {
+    if (despesa.valor > 5000 && (!comentario || comentario.trim() === "")) {
         throw new AppError(400, "Comentário obrigatório para valores acima de 5000");
     }
 
