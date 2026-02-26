@@ -1,18 +1,27 @@
 API de Aprovação de Despesas
 
-API para gerenciamento de despesas com fluxo de aprovação, regras de negócio, autenticação JWT e integração com a API do Banco Central (PTAX).
-Autor - Javan Moisés Girardi
+API REST para gerenciamento de despesas com fluxo de aprovação, regras de negócio, autenticação JWT e integração com a API PTAX do Banco Central do Brasil.
+
+Autor: Javan Moisés Girardi
 
 Tecnologias Utilizadas
 
 Node.js
+
 Express
+
 PostgreSQL
-JWT (jsonwebtoken)
+
+JSON Web Token (jsonwebtoken)
+
 Axios
+
 UUID
+
 Dotenv
-Nodemon (dev)
+
+Nodemon (desenvolvimento)
+
 API PTAX – Banco Central do Brasil
 
 Arquitetura
@@ -31,46 +40,41 @@ src/
  │    └── error.middleware.js
  │
  ├── utils/
- │    └── AppError.js
-      └── cache.js
+ │    ├── AppError.js
+ │    └── cache.js
  │
  ├── config/
  │    └── db.js
  │
  ├── app.js
  └── server.js
- 
-Camadas: 
+Camadas
 
-Controller → Lida com HTTP
-Service → Regras de negócio
-Repository → Acesso ao banco
+Controller → Responsável pela camada HTTP
+
+Service → Contém as regras de negócio
+
+Repository → Acesso ao banco de dados
 
 Middleware → Autenticação e tratamento global de erros
 
-Setup do Projeto:
-1 - Clonar repositório
-git clone <(https://github.com/javagirardi/api-despesas.git)>
+Setup do Projeto
+1. Clonar o repositório
+git clone https://github.com/javagirardi/api-despesas.git
 cd api-despesas
-
-2 - Instalar dependências
+2. Instalar dependências
 npm install
+
 Dependências utilizadas:
+
 npm install express pg jsonwebtoken bcrypt dotenv axios uuid
 npm install --save-dev nodemon
-
-3 - Configurar Banco de Dados
-
-Criar banco:
-
+Configuração do Banco de Dados
+Criar banco
 CREATE DATABASE despesas_db;
-
-Executar o schema.sql:
-
-/*cria a UUID direto no BD*/
+Executar o schema
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-/*cria a tabela de despesas*/
 CREATE TABLE despesas (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   solicitante_email TEXT NOT NULL,
@@ -85,7 +89,6 @@ CREATE TABLE despesas (
   atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
-/*cria a tabela de aprovações com relacionamento entre tabelas*/
 CREATE TABLE aprovacoes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   despesa_id UUID NOT NULL,
@@ -95,70 +98,71 @@ CREATE TABLE aprovacoes (
   ),
   comentario TEXT,
   criado_em TIMESTAMP DEFAULT NOW(),
-
   CONSTRAINT fk_despesa
     FOREIGN KEY (despesa_id)
     REFERENCES despesas(id)
     ON DELETE CASCADE
 );
-
-
-Variáveis de Ambiente:
+Variáveis de Ambiente
 
 Criar um arquivo .env na raiz do projeto:
+
 PORT=3000
 DATABASE_URL=postgres://postgres:[senha]@localhost:5432/despesas_db
-JWT_SECRET= [sua_chave_super_secreta]
-
+JWT_SECRET=sua_chave_super_secreta
 FX_CACHE_TTL=600
-Descrição
+Descrição das variáveis
 Variável	Descrição
 PORT	Porta da aplicação
 DATABASE_URL	String de conexão com PostgreSQL
-JWT_SECRET	Chave para geração do token JWT
-FX_CACHE_TTL = 600 (o tempo do cache em segundos) 
- 
-
+JWT_SECRET	Chave para geração e validação do JWT
+FX_CACHE_TTL	Tempo de cache da cotação em segundos
 Executando o Projeto
-
-Modo desenvolvimento:
+Modo desenvolvimento
 npm run dev
-Modo produção:
+Modo produção
 npm start
 
-Servidor sobe em:
+Servidor disponível em:
+
 http://localhost:3000
-
 Autenticação
-
-Endpoint:
+Login
 POST /auth/login
+
 Body:
+
 {
   "email": "admin@email.com",
   "senha": "123456"
 }
 
-Retorna:
+Resposta:
+
 {
   "access_token": "jwt_token_aqui"
 }
 
-As rotas protegidas exigem:
+Rotas protegidas exigem:
 
 Authorization: Bearer <token>
-Endpoints Principais - 
-Despesas:
+Endpoints Principais
+Despesas
 Criar despesa
 POST /despesas
 Listar despesas (com filtros)
 GET /despesas
 
 Filtros opcionais:
+
 status
+
 centro_custo
+
 min_valor
+
 max_valor
+
 q (busca textual em descricao e centro_custo)
 
 Exemplo:
@@ -166,52 +170,69 @@ Exemplo:
 GET /despesas?status=enviado&min_valor=1000&q=notebook
 Buscar por ID
 GET /despesas/:id
-Editar (apenas se rascunho)
+Editar (apenas se status = rascunho)
 PUT /despesas/:id
 Enviar para aprovação
 POST /despesas/:id/enviar
-
 Aprovação
 Aprovar
 POST /despesas/:id/aprovar
 Rejeitar
 POST /despesas/:id/rejeitar
-
 Regras
-Só pode aprovar/rejeitar se status == enviado
-Valor > 5000 BRL exige comentário
-Registro é salvo na tabela aprovacoes
+
+Só pode aprovar/rejeitar se status = enviado
+
+Valores acima de 5000 BRL exigem comentário
+
+Toda aprovação/rejeição gera registro na tabela aprovacoes
 
 Câmbio
 Cotação
 GET /fx?from=BRL&to=USD
+
 Integração com API PTAX do Banco Central.
 Possui cache configurável via FX_CACHE_TTL.
 
 Resumo com conversão
 GET /despesas/:id/resumo
 
-Retorna valor convertido para USD.
+Retorna os dados da despesa com valor convertido para USD.
 
-Regras de Negócio Implementadas - 
+Regras de Negócio Implementadas
 
-Edição restrita a status rascunho
+Edição restrita ao status rascunho
+
 Aprovação apenas para status enviado
-Registro obrigatório em aprovacoes
-Validação de comentário para valores > 5000
-Tratamento global de erros
-Retorno padronizado de erro
-Uso de HTTP status codes conforme documentação
 
-Testes via Postman - 
+Registro obrigatório em aprovacoes
+
+Validação de comentário para valores acima de 5000
+
+Tratamento global de erros
+
+Retorno padronizado de erros
+
+Uso adequado de códigos HTTP (400, 401, 404, 409, 502)
+
+Testes via Postman
+
 Fluxo recomendado:
 
 Login
+
 Criar despesa
-Editar
-Enviar
-Aprovar/Rejeitar
-Testar valor > 5000
+
+Editar despesa
+
+Enviar para aprovação
+
+Aprovar ou rejeitar
+
+Testar validação para valor acima de 5000
+
 Testar filtros
-Testar resumo
-Testar /fx
+
+Testar resumo com conversão
+
+Testar endpoint /fx
