@@ -18,14 +18,11 @@ exports.getRate = async (from, to) => {
     if (cachedRate) {
         return cachedRate;
     }
-
+    //tentei deixar uma data fixa, mas também estoura erro se consultar antes de abrir o pregão
+    const url = `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/CotacaoDolarDia(dataCotacao=@dataCotacao)?@dataCotacao='${dataFormatada}'&$top=1&$format=json`;
     try {
-        //tentei deixar uma data fixa, mas também estoura erro se consultar antes de abrir o pregão
-        const response = await axios.get(
-            `https://olinda.bcb.gov.br/olinda/servico/PTAX/versao/v1/odata/` +
-            `CotacaoDolarDia(dataCotacao=@dataCotacao)` +
-            `?@dataCotacao='${dataFormatada}'&$top=1&$format=json`
-        );
+
+        const response = await axios.get(url);
 
         if (!response.data.value || response.data.value.length === 0) {
             throw new AppError(502, "Cotação indisponível para a data informada");
@@ -37,7 +34,11 @@ exports.getRate = async (from, to) => {
 
         return rate;
 
+
     } catch (error) {
+
+
+        console.error("Erro real do axios:", error.response?.data || error.message);
         //Erro real no caso comentado acima: Cotação indisponível para a data informada
         throw new AppError(
             502,

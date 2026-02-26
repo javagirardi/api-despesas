@@ -10,7 +10,7 @@ app.use(express.json());
 app.use("/auth", authRoutes);
 app.use("/despesas", despesasRoutes);
 app.use("/despesas", aprovacoesRouter);
-app.use(errorMiddleware);
 app.use("/fx", fxRoutes);
+app.use(errorMiddleware);
 
 module.exports = app;

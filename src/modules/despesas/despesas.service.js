@@ -55,7 +55,7 @@ exports.resumo = async (id) => {
     const despesa = await repository.findById(id);
 
     if (!despesa) {
-        throw { status: 404, message: "Despesa não encontrada" };
+        throw new AppError(404, "Despesa não encontrada");
     }
 
     const rate = await fxService.getRate("BRL", "USD");
