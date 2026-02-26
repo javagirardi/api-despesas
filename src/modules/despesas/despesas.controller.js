@@ -44,3 +44,12 @@ exports.findById = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.resumo = async (req, res, next) => {
+    try {
+        const result = await service.resumo(req.params.id);
+        return res.json(result);
+    } catch (error) {
+        next(error);
+    }
+};
