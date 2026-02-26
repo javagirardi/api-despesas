@@ -1,238 +1,208 @@
-API de Aprovação de Despesas
+# API de Aprovação de Despesas
 
-API REST para gerenciamento de despesas com fluxo de aprovação, regras de negócio, autenticação JWT e integração com a API PTAX do Banco Central do Brasil.
+API REST desenvolvido para desafio técnico que realiza o gerenciamento de despesas com fluxo de aprovação, regras de negócio, autenticação JWT e integração com a API PTAX do Banco Central do Brasil.
 
-Autor: Javan Moisés Girardi
+**Autor:** Javan Moisés Girardi
 
-Tecnologias Utilizadas
+---
 
-Node.js
+## Tecnologias Utilizadas
 
-Express
+* **Node.js**
+* **Express**
+* **PostgreSQL**
+* **JSON Web Token** (jsonwebtoken)
+* **Axios**
+* **UUID**
+* **Dotenv**
+* **Nodemon** (desenvolvimento)
+* **API PTAX** – Banco Central do Brasil
 
-PostgreSQL
+---
 
-JSON Web Token (jsonwebtoken)
+## Arquitetura
 
-Axios
+O projeto segue a separação em camadas para melhor manutenção e escalabilidade:
 
-UUID
-
-Dotenv
-
-Nodemon (desenvolvimento)
-
-API PTAX – Banco Central do Brasil
-
-Arquitetura
-
-O projeto segue separação em camadas:
-
+```text
 src/
- ├── modules/
- │    ├── auth/
- │    ├── despesas/
- │    ├── aprovacoes/
- │    └── fx/
- │
- ├── middlewares/
- │    ├── auth.middleware.js
- │    └── error.middleware.js
- │
- ├── utils/
- │    ├── AppError.js
- │    └── cache.js
- │
- ├── config/
- │    └── db.js
- │
- ├── app.js
- └── server.js
-Camadas
+├── modules/
+│   ├── auth/
+│   ├── despesas/
+│   ├── aprovacoes/
+│   └── fx/
+├── middlewares/
+│   ├── auth.middleware.js
+│   └── error.middleware.js
+├── utils/
+│   ├── AppError.js
+│   └── cache.js
+├── config/
+│   └── db.js
+├── app.js
+└── server.js
 
-Controller → Responsável pela camada HTTP
+```
 
-Service → Contém as regras de negócio
+### Definição das Camadas:
 
-Repository → Acesso ao banco de dados
+* **Controller:** Responsável pela camada HTTP.
+* **Service:** Contém as regras de negócio.
+* **Repository:** Acesso ao banco de dados.
+* **Middleware:** Autenticação e tratamento global de erros.
 
-Middleware → Autenticação e tratamento global de erros
+---
 
-Setup do Projeto
-1. Clonar o repositório
+## Setup do Projeto
+
+1. **Clonar o repositório:**
+```bash
 git clone https://github.com/javagirardi/api-despesas.git
 cd api-despesas
-2. Instalar dependências
+
+```
+
+
+2. **Instalar dependências:**
+```bash
 npm install
 
-Dependências utilizadas:
+```
 
-npm install express pg jsonwebtoken bcrypt dotenv axios uuid
-npm install --save-dev nodemon
-Configuração do Banco de Dados
-Criar banco
+
+
+---
+
+##  Configuração do Banco de Dados
+
+1. **Criar banco:**
+```sql
 CREATE DATABASE despesas_db;
-Executar o schema
+
+```
+
+
+2. **Executar o schema:**
+```sql
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE despesas (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  solicitante_email TEXT NOT NULL,
-  centro_custo TEXT NOT NULL,
-  descricao TEXT NOT NULL,
-  valor NUMERIC(12,2) NOT NULL,
-  moeda TEXT DEFAULT 'BRL',
-  status TEXT NOT NULL CHECK (
-    status IN ('rascunho','enviado','aprovado','rejeitado')
-  ),
-  criado_em TIMESTAMP DEFAULT NOW(),
-  atualizado_em TIMESTAMP DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    solicitante_email TEXT NOT NULL,
+    centro_custo TEXT NOT NULL,
+    descricao TEXT NOT NULL,
+    valor NUMERIC(12,2) NOT NULL,
+    moeda TEXT DEFAULT 'BRL',
+    status TEXT NOT NULL CHECK (status IN ('rascunho','enviado','aprovado','rejeitado')),
+    criado_em TIMESTAMP DEFAULT NOW(),
+    atualizado_em TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE aprovacoes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  despesa_id UUID NOT NULL,
-  aprovador_email TEXT NOT NULL,
-  acao TEXT NOT NULL CHECK (
-    acao IN ('aprovado','rejeitado')
-  ),
-  comentario TEXT,
-  criado_em TIMESTAMP DEFAULT NOW(),
-  CONSTRAINT fk_despesa
-    FOREIGN KEY (despesa_id)
-    REFERENCES despesas(id)
-    ON DELETE CASCADE
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    despesa_id UUID NOT NULL,
+    aprovador_email TEXT NOT NULL,
+    acao TEXT NOT NULL CHECK (acao IN ('aprovado','rejeitado')),
+    comentario TEXT,
+    criado_em TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_despesa FOREIGN KEY (despesa_id) REFERENCES despesas(id) ON DELETE CASCADE
 );
-Variáveis de Ambiente
 
-Criar um arquivo .env na raiz do projeto:
+```
 
-PORT=3000
-DATABASE_URL=postgres://postgres:[senha]@localhost:5432/despesas_db
-JWT_SECRET=sua_chave_super_secreta
-FX_CACHE_TTL=600
-Descrição das variáveis
-Variável	Descrição
-PORT	Porta da aplicação
-DATABASE_URL	String de conexão com PostgreSQL
-JWT_SECRET	Chave para geração e validação do JWT
-FX_CACHE_TTL	Tempo de cache da cotação em segundos
-Executando o Projeto
-Modo desenvolvimento
-npm run dev
-Modo produção
-npm start
 
-Servidor disponível em:
 
-http://localhost:3000
-Autenticação
-Login
-POST /auth/login
+---
 
-Body:
+##  Variáveis de Ambiente
 
+Crie um arquivo `.env` na raiz do projeto com as seguintes chaves:
+
+| Variável | Descrição |
+| --- | --- |
+| **PORT** | Porta da aplicação |
+| **DATABASE_URL** | String de conexão com PostgreSQL |
+| **JWT_SECRET** | Chave para geração e validação do JWT |
+| **FX_CACHE_TTL** | Tempo de cache da cotação em segundos |
+
+---
+
+##  Executando o Projeto
+
+* **Modo desenvolvimento:** `npm run dev`
+* **Modo produção:** `npm start`
+* **Servidor disponível em:** `http://localhost:3000`
+
+---
+
+##  Autenticação
+
+**Login:** `POST /auth/login`
+
+**Body:**
+
+```json
 {
   "email": "admin@email.com",
   "senha": "123456"
 }
 
-Resposta:
+```
 
+**Resposta:**
+
+```json
 {
   "access_token": "jwt_token_aqui"
 }
 
-Rotas protegidas exigem:
+```
 
-Authorization: Bearer <token>
-Endpoints Principais
-Despesas
-Criar despesa
-POST /despesas
-Listar despesas (com filtros)
-GET /despesas
+> **Nota:** Rotas protegidas exigem o header `Authorization: Bearer <token>`.
 
-Filtros opcionais:
+---
 
-status
+## Endpoints Principais
 
-centro_custo
+### Despesas
 
-min_valor
+* **POST /despesas**: Criar despesa.
+* **GET /despesas**: Listar despesas (Filtros: `status`, `centro_custo`, `min_valor`, `max_valor`, `q`).
+* **GET /despesas/:id**: Buscar por ID.
+* **PUT /despesas/:id**: Editar (apenas se status = rascunho).
+* **POST /despesas/:id/enviar**: Enviar para aprovação.
 
-max_valor
+### Aprovação
 
-q (busca textual em descricao e centro_custo)
+* **POST /despesas/:id/aprovar**: Aprovar despesa.
+* **POST /despesas/:id/rejeitar**: Rejeitar despesa.
 
-Exemplo:
+---
 
-GET /despesas?status=enviado&min_valor=1000&q=notebook
-Buscar por ID
-GET /despesas/:id
-Editar (apenas se status = rascunho)
-PUT /despesas/:id
-Enviar para aprovação
-POST /despesas/:id/enviar
-Aprovação
-Aprovar
-POST /despesas/:id/aprovar
-Rejeitar
-POST /despesas/:id/rejeitar
-Regras
+## Regras de Negócio
 
-Só pode aprovar/rejeitar se status = enviado
+* Edição restrita ao status **rascunho**.
+* Aprovação permitida apenas para status **enviado**.
+* Valores acima de **5000 BRL** exigem comentário obrigatório.
+* Toda ação gera registro automático na tabela `aprovacoes`.
+* Tratamento global de erros com retornos padronizados (400, 401, 404, 409, 502).
 
-Valores acima de 5000 BRL exigem comentário
+---
 
-Toda aprovação/rejeição gera registro na tabela aprovacoes
+## Câmbio e Conversão
 
-Câmbio
-Cotação
-GET /fx?from=BRL&to=USD
+* **GET /fx?from=BRL&to=USD**: Integração com API PTAX do Banco Central (com cache).
+* **GET /despesas/:id/resumo**: Retorna os dados da despesa com o valor convertido para USD.
 
-Integração com API PTAX do Banco Central.
-Possui cache configurável via FX_CACHE_TTL.
+---
 
-Resumo com conversão
-GET /despesas/:id/resumo
+## Fluxo de Teste Recomendado (Postman)
 
-Retorna os dados da despesa com valor convertido para USD.
+1. Realizar Login.
+2. Criar uma despesa.
+3. Editar a despesa criada.
+4. Enviar para aprovação.
+5. Tentar aprovar/rejeitar (testar validação de > 5000).
+6. Testar filtros de busca e resumo de conversão.
 
-Regras de Negócio Implementadas
-
-Edição restrita ao status rascunho
-
-Aprovação apenas para status enviado
-
-Registro obrigatório em aprovacoes
-
-Validação de comentário para valores acima de 5000
-
-Tratamento global de erros
-
-Retorno padronizado de erros
-
-Uso adequado de códigos HTTP (400, 401, 404, 409, 502)
-
-Testes via Postman
-
-Fluxo recomendado:
-
-Login
-
-Criar despesa
-
-Editar despesa
-
-Enviar para aprovação
-
-Aprovar ou rejeitar
-
-Testar validação para valor acima de 5000
-
-Testar filtros
-
-Testar resumo com conversão
-
-Testar endpoint /fx
+---
