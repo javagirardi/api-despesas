@@ -17,6 +17,7 @@ exports.update = async (id, data) => {
     }
 
     if (despesa.status !== "rascunho") {
+        //409 - conflito de estado
         throw new AppError(409, "Despesa não pode ser editada");
     }
 
@@ -31,6 +32,7 @@ exports.enviar = async (id) => {
     }
 
     if (despesa.status !== "rascunho") {
+        //409 - conflito de estado
         throw new AppError(409, "Despesa já enviada");
     }
 

@@ -9,9 +9,8 @@ CREATE TABLE despesas (
   descricao TEXT NOT NULL,
   valor NUMERIC(12,2) NOT NULL,
   moeda TEXT DEFAULT 'BRL',
-  status TEXT NOT NULL CHECK (
-    status IN ('rascunho','enviado','aprovado','rejeitado')
-  ),
+  status TEXT NOT NULL DEFAULT 'rascunho'
+  CHECK (status IN ('rascunho','enviado','aprovado','rejeitado')),
   criado_em TIMESTAMP DEFAULT NOW(),
   atualizado_em TIMESTAMP DEFAULT NOW()
 );
