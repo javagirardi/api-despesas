@@ -5,6 +5,7 @@ module.exports = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
+        //sem autenticação
         return res.status(401).json({ error: "Token não informado" });
     }
 
@@ -17,6 +18,7 @@ module.exports = (req, res, next) => {
         //armazena token na requisição
         req.user = decoded;
         next();
+        //nao usar 403, pois é para Sem Autorização
     } catch (error) {
         return res.status(401).json({ error: "Token inválido ou expirado" });
     }
